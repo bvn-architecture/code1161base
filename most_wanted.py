@@ -1,16 +1,18 @@
 # -*- coding: UTF-8 -*-
 """Make a page of faces with names.
 
-Run this and it will produce an HTML file with links to everyone's mugshots
+Run this and it w ill produce an HTML file with links to everyone's mugshots
 """
 
 from __future__ import division
 from __future__ import print_function
+from importlib import import_module
+from StringIO import StringIO
 import os
+import pandas as pd
+import requests
 import ruamel.yaml as yaml
 
-# from week1.tests import theTests as w1test
-from importlib import import_module
 WEEK_NUMBER = 1
 w1test = import_module("week{}.tests".format(WEEK_NUMBER), "theTests")
 w1test = w1test.theTests
@@ -30,12 +32,16 @@ def the_style():
     """
     return """
     <style>
+    @import url('https://fonts.googleapis.com/css?family=Permanent+Marker');
     .person {
         display: inline-block;
         height: 30em;
         overflow: hidden;
         position: relative;
-        width: 20em;
+        width: 19.5vw;
+        border: none;
+        min-width: 15em;
+        margin: -0.1em;
     }
     .person img {
         object-fit: cover;
@@ -48,8 +54,9 @@ def the_style():
       position: absolute;
     }
     .person h1 {
-      top: 0;
+      font-family: 'Permanent Marker';
       padding: 0 1em;
+      top: 0;
     }
     .person dl {
       bottom: 0;
@@ -67,9 +74,95 @@ def the_style():
     """
 
 
+def card_template(details):
+    details["raw"] = "https://raw.githubusercontent.com"
+    details["gh"] = "https://github.com"
+    details["medium"] = "https://medium.com"
+    return """
+    <div class="person">
+    <img src="{raw}/{gitHubUsername}/{repo_name}/master/mugshot.png">
+    <h1>{name}</h1>
+    <dl>
+    <dt>name:</dt>
+      <dd>{name}</dd>
+    <dt>Student Number:</dt>
+      <dd>{studentNumber}</dd>
+    <dt>GitHub:</dt>
+      <dd>
+        <a href="{gh}/{repo_name}">{gitHubUsername}</a>
+      </dd>
+    <dt>Stackoverflow:</dt>
+      <dd>
+        <a href="{stackoverflow}">{stackoverflow}</a>
+      </dd>
+    <dt>Medium:</dt>
+      <dd>
+        <a href="{medium}/{mediumUsername}">{mediumUsername}</a>
+      </dd>
+    <dt>UNSW Email:</dt>
+      <dd>{unswEmail}</dd>
+    <dt>realEmail:</dt>
+      <dd>{realEmailFirstBit}{realEmailOtherBit}</dd>
+    <dt>slack:</dt>
+      <dd>{slack}</dd>
+    </dl>
+    </div>""".format(**details).replace("^AT^", "@")
+
+
+def getDFfromCSVURL(url, columnNames=False):
+    """Get a csv of values from google docs."""
+    r = requests.get(url)
+    data = r.content
+    if columnNames:
+        return pd.read_csv(StringIO(data), header=0, names=columnNames)
+    else:
+        return pd.read_csv(StringIO(data))
+
+
+def df_of_students():
+    """Get an updated copy of the spreadsheet."""
+    # pull the forks list
+    ss_of_details_url = ("https://docs.google.com/spreadsheets/d/"
+                         "1qeOp6PZ48BFLlHaH3ZEil09MBNfQD0gztuCm2cEiyOo/"
+                         "pub?gid=2144767463"
+                         "&single=true&output=csv")
+
+    return getDFfromCSVURL(ss_of_details_url, ["paste",
+                                               "their_username",
+                                               "repo_name",
+                                               "check",
+                                               "repo_url",
+                                               "slack"])
+
+
+def rip_out_dicts(d):
+    newD = {}
+    for key in d.iterkeys():
+        row = d[key]
+        if type(row) is dict:
+            i = row.keys()[0]
+            newD[key] = row[i]
+        else:
+            newD[key] = row
+    return newD
+
+
+def graft_fork_onto_aboutMe(forkDetails, about_me_details):
+    f = forkDetails
+    a = dict(about_me_details)
+    # print("XXXXXXXXXX", f, "\n", a)
+    username = a["gitHubUsername"]
+    pertinent_row = f[f["their_username"] == username]
+    pertinent_row = pertinent_row.to_dict()
+    a.update(pertinent_row)  # update is in place
+    return rip_out_dicts(a)
+
+
 def make_guess_who_board():
     """Generate code for each person."""
     dirList = os.listdir(rootdir)
+
+    student_fork_details = df_of_students()
 
     body = the_style()
 
@@ -84,34 +177,11 @@ def make_guess_who_board():
             if details["mediumUsername"][0] != "@":
                 details["mediumUsername"] = "@" + details["mediumUsername"]
             details["repo_name"] = student_repo
+            details = graft_fork_onto_aboutMe(student_fork_details,
+                                              details)
+
             print(details)
-            body += """
-            <div class="person">
-            <img src="https://raw.githubusercontent.com/{gitHubUsername}/code1161base/master/mugshot.png">
-            <h1>{name}</h1>
-            <dl>
-            <dt>name:</dt>
-              <dd>{name}</dd>
-            <dt>Student Number:</dt>
-              <dd>{studentNumber}</dd>
-            <dt>GitHub:</dt>
-              <dd>
-                <a href="https://github.com/{gitHubUsername}">{gitHubUsername}</a>
-              </dd>
-            <dt>Stackoverflow:</dt>
-              <dd>
-                <a href="{stackoverflow}">{stackoverflow}</a>
-              </dd>
-            <dt>Medium:</dt>
-              <dd>
-                <a href="https://medium.com/{mediumUsername}">{mediumUsername}</a>
-              </dd>
-            <dt>UNSW Email:</dt>
-              <dd>{unswEmail}</dd>
-            <dt>realEmail:</dt>
-              <dd>{realEmailFirstBit}{realEmailOtherBit}</dd>
-            </dl>
-            </div>""".format(**details).replace("^AT^", "@")
+            body += card_template(details)
         except Exception as e:
             print("failed on", student_repo, e)
     return body
