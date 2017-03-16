@@ -11,6 +11,10 @@ git config --global credential.helper 'cache --timeout=36000' #cache password fo
 git config --global color.ui auto #colour the output in git
 git config --global core.editor "atom --wait"
 
+#in case this sh has been run multiple times before
+git config --global --replace-all user.email $MYEMAIL
+git config --global --replace-all user.name $MYNAME
+
 git config --list
 
 apm install script
@@ -22,4 +26,8 @@ sudo pip install colorama
 sudo pip uninstall flake8 -y
 sudo pip install flake8==3.2.0
 
+echo
 echo "That should have fixed the bugs"
+
+10931100
+1135
