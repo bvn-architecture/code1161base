@@ -7,12 +7,12 @@ It can clone new repos if you set THERE_ARE_NEW_STUDENTS to true
 
 from __future__ import division
 from __future__ import print_function
+from importlib import import_module
+from StringIO import StringIO
 import git
 import os
 import pandas as pd
 import requests
-from StringIO import StringIO
-from importlib import import_module
 
 
 LOCAL = os.path.dirname(os.path.realpath(__file__))  # the context of this file
