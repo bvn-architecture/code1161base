@@ -12,20 +12,13 @@ import os
 import pandas as pd
 import requests
 from StringIO import StringIO
-
-# from week1.tests import theTests as w1test
 from importlib import import_module
-WEEK_NUMBER = 1
-w1test = import_module("week{}.tests".format(WEEK_NUMBER), "theTests")
-w1test = w1test.theTests
+
 
 LOCAL = os.path.dirname(os.path.realpath(__file__))  # the context of this file
 CWD = os.getcwd()  # The curent working directory
 print("LOCAL", LOCAL)
 print("CWD", CWD)
-
-rootdir = '../code1161StudentRepos'
-THERE_ARE_NEW_STUDENTS = True
 
 
 def getDFfromCSVURL(url, columnNames=False):
@@ -38,8 +31,9 @@ def getDFfromCSVURL(url, columnNames=False):
         return pd.read_csv(StringIO(data))
 
 
-def update_for_new_students():
+def update_for_new_students(chatty=False):
     """Get an updated copy of the spreadsheet."""
+    # pull the forks list
     ss_of_details_url = ("https://docs.google.com/spreadsheets/d/"
                          "1qeOp6PZ48BFLlHaH3ZEil09MBNfQD0gztuCm2cEiyOo/"
                          "pub?gid=2144767463"
@@ -50,38 +44,23 @@ def update_for_new_students():
                                                           "repo_name",
                                                           "check",
                                                           "repo_url"])
-    print("student_details:\n", student_details)
 
     for index, student in student_details.iterrows():
         try:
-            print("new repo for", student.their_username)
             git.Repo.clone_from(student.repo_url,
                                 os.path.join(rootdir, student.their_username))
+            print("new repo for", student.their_username)
         except Exception:
-            print("we already have have", student.their_username)
+            if chatty:
+                print("we already have", student.their_username)
+
+    return student_details
 
 
 def pull_all_repos(dirList):
     """Pull latest version of all repos."""
     for student_repo in dirList:
         git.cmd.Git(os.path.join(rootdir, student_repo)).pull()
-
-
-def markWk1(dirList):
-    """Mark week 1's exercises."""
-    # print("dirList:", dirList)
-
-    results = []
-    for student_repo in dirList:
-        print("\nFor:", student_repo)
-        marks = w1test(os.path.join(rootdir, student_repo, "week1"))
-        marks.update({"student_number": student_repo})
-        results.append(marks)
-
-    print("\n\nResults:")
-    resultsDF = pd.DataFrame(results)
-    print(resultsDF)
-    resultsDF.to_csv(os.path.join(CWD, "week{}marks.csv".format(WEEK_NUMBER)))
 
 
 def csvOfDetails(dirList):
@@ -107,16 +86,52 @@ def csvOfDetails(dirList):
     print("\n\nResults:")
     resultsDF = pd.DataFrame(results)
     # print(resultsDF)
-    resultsDF.to_csv(os.path.join(CWD,
-                                  "studentDetails.csv".format(WEEK_NUMBER)))
+    resultsDF.to_csv(os.path.join(CWD, "studentDetails.csv"))
 
+
+def mark_work(dirList, week_number):
+    """Mark the week's exercises."""
+    results = []
+    for student_repo in dirList:
+        test = import_module("week{}.tests".format(week_number))
+        this_path = os.path.join(rootdir,
+                                 student_repo,
+                                 "week{}".format(week_number))
+        print(this_path)
+        print("\nFor:", student_repo)
+        marks = test.theTests(this_path)
+        marks.update({"student_number": student_repo})
+        results.append(marks)
+
+        # Clean up, ready to import the module again with a different person
+        del test
+        print("\n\n\n\n")
+
+    resultsDF = pd.DataFrame(results)
+    print("\n\nResults:\n", resultsDF)
+    resultsDF.to_csv(os.path.join(CWD, "week{}marks.csv".format(week_number)),
+                     index=False)
+    print("\n"*10)
+    return resultsDF
+
+
+rootdir = '../code1161StudentRepos'
 
 dirList = os.listdir(rootdir)
+print("dir list", dirList)
 
-print(dirList)
+print("\nCheck to see if there are any new students in the spreadsheet")
+update_for_new_students(chatty=True)
 
-if THERE_ARE_NEW_STUDENTS:
-    update_for_new_students()
+print("\nPull all the repos so we have the latest copy. (This takes a while.)")
+pull_all_repos(dirList)
 
-# pull_all_repos(dirList)
+print("\nUpdate the CSV of details")
 csvOfDetails(dirList)
+# This feeds the sanity check spreadsheet
+
+print("\nMark week 1's work")
+mark_work(dirList, 1)
+
+print("\nMark week 2's work")
+mark_work(dirList, 2)
