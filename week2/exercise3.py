@@ -11,7 +11,7 @@ def is_odd(a_number):
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def fix_it(moves=True, should_move=True):
@@ -27,7 +27,7 @@ def fix_it(moves=True, should_move=True):
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_1a():
@@ -39,7 +39,7 @@ def loops_1a():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def star_map():
@@ -52,7 +52,7 @@ def star_map():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_1c(number_of_items=5, symbol="#"):
@@ -65,7 +65,7 @@ def loops_1c(number_of_items=5, symbol="#"):
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_2():
@@ -88,7 +88,7 @@ def loops_2():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_3():
@@ -114,7 +114,7 @@ def loops_3():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_4():
@@ -134,7 +134,7 @@ def loops_4():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_5():
@@ -161,7 +161,7 @@ def loops_5():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_6():
@@ -186,7 +186,7 @@ def loops_6():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def loops_7():
@@ -212,7 +212,7 @@ def loops_7():
     """
     myPointlessVriable = 1+1
     print("hippies")
-    return "Iron Vest Yan"
+    return "Iron Vest Yan" + str(myPointlessVriable)
 
 
 def lp(some_kind_of_list, exercise_name):
