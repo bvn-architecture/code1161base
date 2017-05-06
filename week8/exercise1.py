@@ -185,7 +185,7 @@ def fast_filler(number_of_words=200):
         w = d[number_of_letters][which_word]
         paragraph_list.append(w)
     p = " ".join(paragraph_list) + "."
-    p = p[0].upper + p[1:]
+    p = p[0].upper() + p[1:]
     return p
 
 
